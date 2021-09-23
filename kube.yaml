@@ -1,0 +1,110 @@
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   labels:
+#     app: auto-reload-nginx
+#   name: auto-reload-nginx
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: auto-reload-nginx
+  namespace: auto-reload-nginx
+  labels:
+    app: auto-reload-nginx
+    name: auto-reload-nginx
+    version: v1
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 30%
+      maxUnavailable: 20%
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: auto-reload-nginx
+  template:
+    metadata:
+      labels:
+        app: auto-reload-nginx
+    spec:
+      containers:
+        - name: nginx
+          livenessProbe:
+            periodSeconds: 5
+            tcpSocket:
+              port: 80
+          env:
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: K8S_HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: K8S_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: K8S_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: ADD_FUN
+              value: Yeah
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: K8S_HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: K8S_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: K8S_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: K8S_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          envFrom:
+            - configMapRef:
+                name: nginx-config
+          imagePullPolicy: IfNotPresent
+          readinessProbe:
+            failureThreshold: 2
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 10
+            httpGet:
+              path: /new
+              port: 80
+          image: nanda/nginx-auto-reload:1.21.1
+          ports:
+            - protocol: TCP
+              name: httpport
+              containerPort: 80
+          resources:
+            limits:
+              cpu: 400m
+              memory: 400Mi
+            requests:
+              cpu: 300m
+              memory: 300Mi
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: nginx-config
+            items:
+              - key: new_routes.conf
+                path: new_routes.conf

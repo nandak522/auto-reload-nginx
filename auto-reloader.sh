@@ -3,7 +3,8 @@ set -eou pipefail
 
 while true
 do
-    inotifywait --monitor \
+    inotifywait \
+        --monitor \
         --exclude .swp \
         --event create \
         --event modify \

@@ -22,3 +22,15 @@ Immediately on the you would find the latest config changes are picked up
 and nginx reload itself gracefully :point_down
 
 ![screenshot](/screenshot.png "Screenshot")
+
+### Want to try in K8s ?
+```sh
+kubectl create ns auto-reload-nginx
+kubectl -n auto-reload-nginx create configmap nginx-config  --from-file=new_routes.conf
+kubectl apply -f kube.yaml
+```
+Edit the configmap in a parallel window using
+```sh
+kubectl -n auto-reload-nginx edit configmap nginx-config
+```
+and watch for logs of the pod. It should reload nginx service running inside the pod, inside a minute.
