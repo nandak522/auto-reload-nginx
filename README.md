@@ -2,7 +2,7 @@
 
 ### Build Nginx
 ```sh
-docker build -t nginx-auto-reload:1.21.1
+docker build -t nanda/nginx-auto-reload:1.21.1 .
 ```
 
 ### Run Nginx

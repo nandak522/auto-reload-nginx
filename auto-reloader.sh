@@ -3,7 +3,13 @@ set -eou pipefail
 
 while true
 do
-    inotifywait --exclude .swp -e create -e modify -e delete -e move /etc/nginx/ /etc/nginx/conf.d
+    inotifywait --monitor \
+        --exclude .swp \
+        --event create \
+        --event modify \
+        --event delete \
+        --event move \
+        /etc/nginx/ /etc/nginx/conf.d
     echo "Detected Nginx Configuration Change"
     nginx -t
     if [ $? -eq 0 ]
